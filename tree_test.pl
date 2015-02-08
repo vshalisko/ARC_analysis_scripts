@@ -4,10 +4,14 @@ use strict;
 use Bio::TreeIO;
 use Bio::Tree::Draw::Cladogram;
 
+# file to store results (will be rewritten each time)
 my $output_file = "prueba.csv";
+# log file (will be rewritten each time)
 my $logfile = "pruebas_log.log";
 # ArcGIS python path
 my $python_path = "C:\\Python27\\ArcGIS10.1\\python.exe";
+# name of python script to calculate intersect areas, should be located in same directory as this script
+my $intersect_script = "intersect_areas.py";
 
 
 # redirecting warnings to log file
@@ -137,7 +141,7 @@ print DATAFILE "node_id,root_distance,null_intersects,intersect_score,number_of_
         									 . "_B" . $descendentB_node->internal_id() . "_T" . time;
         					# execute geographic intersect script
         					###################### external script intersect_areas.py call ##############################
-        					my $external_output = `$python_path intersect_areas.py $area_A $area_B $area_output`;
+        					my $external_output = `$python_path $intersect_script $area_A $area_B $area_output`;
         					if($external_output =~ /Exception/sm) {
         						# External script has generated some error so we don´t have result of this execution
         						print "!";
@@ -239,6 +243,7 @@ sub select_leafs_only {
 }
 
 sub calculate_area_part {
+    # return the result of the following formula I/MIN(A,B)
 
 	my ($A,$B,$I) = @_;
 	my $R = undef;
@@ -256,7 +261,7 @@ sub calculate_area_part {
 $SIG{__DIE__} = sub
 {
     my @loc = caller(1);
-    print STDOUT "Scripti execution interrumped, results are incomplete.\n";
-    print STDOUT "Exception happened at line $loc[2] in $loc[1]:\n" . @_ . "\n";
+    print STDOUT "Script execution has interrumped, results are incomplete.\n";
+    print STDOUT "Error at line $loc[2] in $loc[1]:\n" . @_ . "\n";
     return 1;
 };
