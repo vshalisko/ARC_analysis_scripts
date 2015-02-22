@@ -1,7 +1,27 @@
-#Name: intersect_areas.py
+# Area intersect script intersect_areas.py ver 1.0
+# [Works with ESRI ArcGIS 10]
 # Purpose: Intersect of 2 polygons (feature class in geodatabase) to get 
 # 3 values: area of polygon A, area of polygon B, area of intersection
-# by Viacheslav Shalisko 2015
+# By Viacheslav Shalisko 2015
+#
+#    This script forms part of ARC analysis software
+#    Copyright (C) 2015  Viacheslav Shalisko
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#    
+#-------------------
+
 
 # Import system modules
 import sys

@@ -37,33 +37,33 @@ my $intersect_script = "intersect_areas.py";
 # hash of relation between terminal nodes (leafs) and vector layers with area distributions
 # [todo: better to move vector layer names directly to NEXUS format and get them from input file as characters]
  my %geographic_hash = (
-#                    "Moranopteris_inaccessans_VT349" => "Moranopteris_inaccessa_u04_b1km_ver2",
-#                    "Moranopteris_longisetosa" => "Moranopteris_longisetosa_u018_b1km",
-#                    "Moranopteris_basiattenuata" => "Moranopteris_bieattenuata_u005_b1km_f1",
-#                    "Moranopteris_aphelolepis_557" => "Moranopteris_aphelolepis_u05_b1km",
-#                    "Moranopteris_blepharidea" => "Moranopteris_blepharidea_u05_b1km",
-#                    "Moranopteris_hyalina_1148" => "Moranopteris_hyalina_u015_b1km",
-#                    "Moranopteris_hyalina_1426" => "Moranopteris_hyalina_u015_b1km",
-#                    "Moranopteris_gradata" => "Moranopteris_gradata_u015_b1km",
-#                    "Moranopteris_setosa" => "Moranopteris_setosa_u01_b1km",
-#                    "Moranopteris_perpusilla" => "Moranopteris_perpusilla_u05_b1km",
-#                    "Moranopteris_achilleifolia_" => "Moranopteris_achilleifolia_u03_b1km",
-#                    "Moranopteris_serricula_8084" => "Moranopteris_serricula_u0025_b1km_f3",
-#                    "Moranopteris_zurquina_" => "Moranopteris_zurquina_u005_b1km_f3",
-#                    "Moranopteris_trichomanoides_114" => "Moranopteris_trichomanoides_u01_b1km",
-#                    "Moranopteris_sherringii_VT22" => "Moranopteris_sherringii_u01_b1km_f2",
-#                    "Moranopteris_williamsii" => "Moranopteris_williamsii_u05_b1km",
-#                    "Moranopteris_cookii" => "Moranopteris_cookei_u01_b1km",
-#                    "Moranopteris_caucana_182" => "Moranopteris_caucana_u01_b1km",
-#                    "Moranopteris_caucana_13445" => "Moranopteris_caucana_u01_b1km",
-#                    "Moranopteris_truncicola_862" => "Moranopteris_truncicola_u02_b1km",
+                    "Moranopteris_inaccessans_VT349" => "Moranopteris_inaccessa_u04_b1km_ver2",
+                    "Moranopteris_longisetosa" => "Moranopteris_longisetosa_u018_b1km",
+                    "Moranopteris_basiattenuata" => "Moranopteris_bieattenuata_u005_b1km_f1",
+                    "Moranopteris_aphelolepis_557" => "Moranopteris_aphelolepis_u05_b1km",
+                    "Moranopteris_blepharidea" => "Moranopteris_blepharidea_u05_b1km",
+                    "Moranopteris_hyalina_1148" => "Moranopteris_hyalina_u015_b1km",
+                    "Moranopteris_hyalina_1426" => "Moranopteris_hyalina_u015_b1km",
+                    "Moranopteris_gradata" => "Moranopteris_gradata_u015_b1km",
+                    "Moranopteris_setosa" => "Moranopteris_setosa_u01_b1km",
+                    "Moranopteris_perpusilla" => "Moranopteris_perpusilla_u05_b1km",
+                    "Moranopteris_achilleifolia_" => "Moranopteris_achilleifolia_u03_b1km",
+                    "Moranopteris_serricula_8084" => "Moranopteris_serricula_u0025_b1km_f3",
+                    "Moranopteris_zurquina_" => "Moranopteris_zurquina_u005_b1km_f3",
+                    "Moranopteris_trichomanoides_114" => "Moranopteris_trichomanoides_u01_b1km",
+                    "Moranopteris_sherringii_VT22" => "Moranopteris_sherringii_u01_b1km_f2",
+                    "Moranopteris_williamsii" => "Moranopteris_williamsii_u05_b1km",
+                    "Moranopteris_cookii" => "Moranopteris_cookei_u01_b1km",
+                    "Moranopteris_caucana_182" => "Moranopteris_caucana_u01_b1km",
+                    "Moranopteris_caucana_13445" => "Moranopteris_caucana_u01_b1km",
+                    "Moranopteris_truncicola_862" => "Moranopteris_truncicola_u02_b1km",
                     "Moranopteris_truncicola_626" => "Moranopteris_truncicola_u02_b1km",
-#                    "Moranopteris_taenifolia_08116" => "Moranopteris_taenifolia_u015_b1km_f3",
+                    "Moranopteris_taenifolia_08116" => "Moranopteris_taenifolia_u015_b1km_f3",
                     "Moranopteris_taenifolia_sn" => "Moranopteris_taenifolia_u015_b1km_f3",
                     "Moranopteris_microlepis_2584" => "Moranopteris_microlepis_u04_b1km",
                     "Moranopteris_microlepis_2003" => "Moranopteris_microlepis_u04_b1km",
-#                    "Moranopteris_plicata" => "Moranopteris_plicata_u025_b1km",
-#                    "Moranopteris_nana" => "Moranopteris_nana_u02_b1km",
+                    "Moranopteris_plicata" => "Moranopteris_plicata_u025_b1km",
+                    "Moranopteris_nana" => "Moranopteris_nana_u02_b1km",
                     "Moranopteris_grisebachii" => "Moranopteris_grisebachii_u01_b1km_f3",
                         );
 my %area_data_hash = ();
@@ -75,8 +75,8 @@ open( DATAFILE, ">$output_file" ) || die "\nCan't open output file $output_file 
 print DATAFILE "tree_id,node_id,root_distance,null_intersects,intersect_score,number_of_leaves,combinations,incomplete_combinations\n";
 
 
-my $treeio = Bio::TreeIO->new(-format => 'nexus', -file => 'RAxML_bipartitions.result_nexus');
-my $treeout = Bio::TreeIO->new(-format => 'nexus', -file => '>modified_tree.nex');
+my $treeio = Bio::TreeIO->new(-format => 'nexus', -file => 'Moranopteris_matrix_4_reexport.trees_last500');
+my $treeout = Bio::TreeIO->new(-format => 'nexus', -file => '>20150221_modified_tree.nex');
 my $tree_number = 0;
 
 while( my $binary_tree = $treeio->next_tree ) {

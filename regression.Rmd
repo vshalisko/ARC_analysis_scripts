@@ -1,0 +1,91 @@
+## Processing of the results of ARC analysis run
+========================================================
+
+### Script for processing the table from ARC analysis (typically the result of tree_test.pl run) and draw the linear regression
+
+By Viacheslav Shalisko 2015
+
+    This script forms part of ARC analysis software
+    Copyright (C) 2015  Viacheslav Shalisko
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+-------------------
+
+## 1) Load and check the source data
+
+* Read source table (.csv), the table should have columns "intersect_score" for value weighted overlap of areas and "root distance" for inverse distance from root in units or branch length (the lowest) or estimated node age
+* Replace "incomplete"" values with "-1" (in order to exclude cases without numeric value of weighted area intersect)
+* Output table dmensions & summary table for control
+
+```{r}
+result_table <- read.csv("20150221_prueba.csv", stringsAsFactors=FALSE)
+
+result_table[result_table$intersect_score == "incomplete",5] = "-1" 
+result_table[,"intersect_score"] <- sapply(result_table[,"intersect_score"], as.numeric)
+
+dim(result_table)
+summary(result_table)
+```
+
+## 2) Select data for analysis
+
+* Exclude lines with negative weighted area intersect values (the negative values are likely the -1 codes from previous step)
+* Exclude lines with complete overlay (this is a temporal solution and should be uded with care). In case that phylogenetic tree include several nodes for the same specie, this will give readings of complete overlay, so when excluding the complete overlay scores, we exclude effect from case where several terminal nodes represent the same taxa, note that there is no problem for interspecific area comparisons, as the weighting effect compensate presence of several nodes instead of one. Sometimes the complete overlay areas could really be observed for species pair, when one species is located completely within area of distribution of another species. That´s why the analysis script require further improvement in this aspect.
+* Output table dmensions & summary table for control
+
+```{r}
+useful_data <- result_table[result_table$intersect_score >= 0 & result_table$intersect_score < 1,]
+
+dim(useful_data)
+summary(useful_data)
+```
+
+## 3) Represent the node points in the scatterplot of node age (or inverse distance from the root) vs. area intersect and fit the linear regression
+
+* Provide the points scatterplot
+* Fit the linear regression and draw line
+* Output the summary of regression values
+
+```{r fig.width=10, fig.height=10}
+plot(useful_data$root_distance, useful_data$intersect_score, 
+     main="Scatterplot Example", type="p", col="gray10", lwd=1,
+    xlab="node age", ylab="weighted intersect score ", pch=1)
+linear_regression <- lm(useful_data$intersect_score~useful_data$root_distance)
+abline(linear_regression, col="red", lwd=2)
+
+summary(linear_regression)
+anova(linear_regression)
+
+```
+
+### Intercept value: `r linear_regression$coefficients[1]`
+### Slope value: `r linear_regression$coefficients[2]`
+
+## 4) Experiments with GLM
+
+
+```{r fig.width=10, fig.height=10}
+plot(useful_data$root_distance, useful_data$intersect_score, 
+     main="Scatterplot Example", type="p", col="gray10", lwd=1,
+    xlab="node age", ylab="weighted intersect score ", pch=1)
+g_linear_model <- glm(useful_data$intersect_score~useful_data$root_distance,
+                      family=gaussian)
+abline(g_linear_model, col="blue", lwd=2)
+
+summary(g_linear_model)
+anova(g_linear_model)
+
+```
+
