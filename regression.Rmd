@@ -23,7 +23,7 @@ By Viacheslav Shalisko 2015
     
 -------------------
 
-## 1) Load and check the source data
+### 1) Load and check the source data
 
 * Read source table (.csv), the table should have columns "intersect_score" for value weighted overlap of areas and "root distance" for inverse distance from root in units or branch length (the lowest) or estimated node age
 * Replace "incomplete"" values with "-1" (in order to exclude cases without numeric value of weighted area intersect)
@@ -39,7 +39,7 @@ dim(result_table)
 summary(result_table)
 ```
 
-## 2) Select data for analysis
+### 2) Select data for analysis
 
 * Exclude lines with negative weighted area intersect values (the negative values are likely the -1 codes from previous step)
 * Exclude lines with complete overlay (this is a temporal solution and should be uded with care). In case that phylogenetic tree include several nodes for the same specie, this will give readings of complete overlay, so when excluding the complete overlay scores, we exclude effect from case where several terminal nodes represent the same taxa, note that there is no problem for interspecific area comparisons, as the weighting effect compensate presence of several nodes instead of one. Sometimes the complete overlay areas could really be observed for species pair, when one species is located completely within area of distribution of another species. That´s why the analysis script require further improvement in this aspect.
@@ -52,40 +52,119 @@ dim(useful_data)
 summary(useful_data)
 ```
 
-## 3) Represent the node points in the scatterplot of node age (or inverse distance from the root) vs. area intersect and fit the linear regression
+### 3) Represent the node points in the scatterplot of node age (or inverse distance from the root) vs. area intersect and fit the linear regression
 
 * Provide the points scatterplot
 * Fit the linear regression and draw line
 * Output the summary of regression values
 
 ```{r fig.width=10, fig.height=10}
-plot(useful_data$root_distance, useful_data$intersect_score, 
-     main="Scatterplot Example", type="p", col="gray10", lwd=1,
-    xlab="node age", ylab="weighted intersect score ", pch=1)
-linear_regression <- lm(useful_data$intersect_score~useful_data$root_distance)
+y <- useful_data$intersect_score
+x <- useful_data$root_distance
+
+plot(x, y, type="p", col="gray10", lwd=1, pch=1,
+     main="Scatterplot weighted intersect score vs. node age", 
+     xlab="node age", ylab="weighted intersect score ")
+
+linear_regression <- lm(y ~ x)
 abline(linear_regression, col="red", lwd=2)
 
+sequence <- data.frame(x=(seq(min(x), max(x), length.out = length(x))))
+
+preds <- predict(linear_regression, newdata = sequence, 
+                 interval = "confidence", level = 0.95, type="response")
+
+lines(sequence[,1],preds[,2],col="gray",lty=2) 
+lines(sequence[,1],preds[,3],col="gray",lty=2) 
+```
+
+#### Intercept value: `r linear_regression$coefficients[1]`
+#### Slope value: `r linear_regression$coefficients[2]`
+
+```{r}
 summary(linear_regression)
 anova(linear_regression)
+```
+
+### 4) Experiments with GLM
+* Study the dependent variable distibution (normal, gamma)
+* From parametric distributions Gamma seems to be better choice, but it can not be ajustid when x = 0, so small data alteration is required (0 values are substituded to 1e-10, and tha general shape of distribution as ajusted excluding 0)
+* Use GLM module to fit the linear regression with data following Gamma distribution
+
+
+```{r fig.width=10, fig.height=10, warning = FALSE}
+library(fitdistrplus)
+
+f_norm <- fitdist(y, "norm")
+summary(f_norm)
+
+# excluding 0 values (not a good trick, 
+# but this allows to get shape in the first iteration)
+yf <- y[y > 0]  
+f_gamma <- fitdist(yf, "gamma")
+summary(f_gamma)
+
+# as gamma distribution cannot be fitted with x = 0, all this data 
+# are changed to extremely low x = 1e-10
+# the rate parameter of distribution is fixed to value from the first iteration
+yf1 <- y + 1e-10
+f1_gamma <- fitdist(yf1, "gamma", 
+                    start=list(shape=f_gamma[["estimate"]][["shape"]]),
+                    fix.arg=list(rate=f_gamma[["estimate"]][["rate"]]))
+summary(f1_gamma)
+
+hist(y, col="grey", prob=TRUE)
+lines(density(y), lty="dotted", lwd=1, col="black")           # add a density estimate with defaults
+lines(density(y, adjust=3), lty="dotted", lwd=2, col="red")   # add another "smoothed" density
+curve(dnorm(x, mean=f_norm[["estimate"]][["mean"]], 
+            sd=f_norm[["estimate"]][["sd"]]), 
+            col="darkblue", lwd=2, add=TRUE, yaxt="n")
+curve(dgamma(x, f_gamma[["estimate"]][["shape"]], 
+             rate=f_gamma[["estimate"]][["rate"]]), 
+            col="blue", lwd=2, add=TRUE, yaxt="n")
+curve(dgamma(x, f1_gamma[["estimate"]][["shape"]], 
+             rate=f_gamma[["estimate"]][["rate"]]), 
+            col="darkgreen", lwd=2, add=TRUE, yaxt="n")
+
+legend(0.7,2,
+    c("density fit","smmothed density fit ",
+      "normal","gamma (w/o 0)","gamma (with ajust of 0) "), 
+    lty=c(2,2,1,1,1),
+    lwd=c(1,2,2,2,2),
+    col=c("black","red","darkblue","blue","darkgreen")) 
+
+plot(x, y, type="p", col="gray10", lwd=1, pch=1,
+     main="Scatterplot weighted intersect score vs. node age", 
+     xlab="node age", ylab="weighted intersect score ")
+
+g_linear_model <- glm(yf1 ~ x,
+                      family=Gamma(link=identity))
+abline(g_linear_model, col="blue", lwd=2)
 
 ```
 
-### Intercept value: `r linear_regression$coefficients[1]`
-### Slope value: `r linear_regression$coefficients[2]`
+#### Intercept value: `r g_linear_model$coefficients[1]`
+#### Slope value: `r g_linear_model$coefficients[2]`
 
-## 4) Experiments with GLM
-
-
-```{r fig.width=10, fig.height=10}
-plot(useful_data$root_distance, useful_data$intersect_score, 
-     main="Scatterplot Example", type="p", col="gray10", lwd=1,
-    xlab="node age", ylab="weighted intersect score ", pch=1)
-g_linear_model <- glm(useful_data$intersect_score~useful_data$root_distance,
-                      family=gaussian)
-abline(g_linear_model, col="blue", lwd=2)
+```{r}
 
 summary(g_linear_model)
 anova(g_linear_model)
 
 ```
 
+### 5) Compare simple linear fit with GLM fit (Gamma)
+
+* The AIC comparison (the lower value is better)
+* The BIC comparison
+* Log-Likelihood values
+
+```{r}
+# Akaike's Information Criterion
+AIC(linear_regression,g_linear_model)
+# Bayasian Information Criterion
+BIC(linear_regression,g_linear_model)
+# log-likelihood as AIC/BIC
+logLik(linear_regression)
+logLik(g_linear_model)
+```
